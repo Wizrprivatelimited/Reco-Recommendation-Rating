@@ -1,0 +1,157 @@
+             ┌──────────────────────────────┐
+             │ 1. Open Course Data File     │
+             └────────────┬─────────────────┘
+                          │
+                          ▼
+      ┌────────────────────────────────────┐
+      │ 2. Read 'course_duration__c' and   
+      │    'duration_medium__c' columns  
+      └────────────┬───────────────────────┘
+                   │
+                   ▼
+  ┌──────────────────────────────────────────────┐
+  │ 3. Normalize Units (Day→Days, etc.)          │
+  └────────────────┬─────────────────────────────┘
+                   │
+                   ▼
+     ┌────────────────────────────────────┐
+     │ 4. Define Seconds for Time Units   │
+     └────────────────┬───────────────────┘
+                      │
+                      ▼
+   ┌────────────────────────────────────────┐
+   │ 5. Convert all durations into seconds │
+   └────────────────┬──────────────────────┘
+                    │
+                    ▼
+  ┌──────────────────────────────────────────┐
+  │ 6. Add 'Duration_in_seconds' column      │
+  └────────────────┬─────────────────────────┘
+                   │
+                   ▼
+  ┌──────────────────────────────────────────────────────┐
+  │ 7. Add 'Is_within_a_week' column (True if = 7 days)  │
+  └────────────────┬─────────────────────────────────────┘
+                   │
+                   ▼
+┌──────────────────────────────────────────────────────────────┐
+│ 8. Mark Integration (True if provider in [Guvi, Edujournal,  │
+│    Sharpener, Business Toys])                                │
+└────────────────┬─────────────────────────────────────────────┘
+                 │
+                 ▼
+ ┌────────────────────────────────────────────────────┐
+ │ 9. Count concepts: count commas in 'concepts' col  │
+ └────────────────┬───────────────────────────────────┘
+                  │
+                  ▼
+┌──────────────────────────────────────────────────────────────┐
+│10. Handle missing concepts:                                  │
+│   - If empty: concept_count=0, show=True, concept=False      │
+└────────────────┬─────────────────────────────────────────────┘
+                 │
+                 ▼
+┌─────────────────────────────────────────────────────────────────────────┐
+│11. Mark Priority_cpp (True if provider is Henry Harvin or Eduonix)     │
+└────────────────┬────────────────────────────────────────────────────────┘
+                 │
+                 ▼
+ ┌─────────────────────────────────────────────┐
+ │12. Mark Udemy_course (True if Udemy)        │
+ └────────────────┬────────────────────────────┘
+                  │
+                  ▼
+┌────────────────────────────────────────────────────────────┐
+│13. Mark ABC_coursera (Only for Coursera in ABC data)       │
+└────────────────┬───────────────────────────────────────────┘
+                 │
+                 ▼
+┌──────────────────────────────────────────────────────────────┐
+│14. Mark ABC (True if provider is GVC, Gyanodaya, or CIEL)    │
+└────────────────┬─────────────────────────────────────────────┘
+                 │
+                 ▼
+  ┌────────────────────────────────────────────────────────────┐
+  │15. Rank courses by:                                        │
+  │   - Duration_in_seconds                                    │
+  │   - Integration                                            │
+  │   - INR amount                                             │
+  └────────────────┬───────────────────────────────────────────┘
+                   │
+                   ▼
+   ┌────────────────────────────────────────────────────────────┐
+   │16. Save Final File with These Columns in Order:            │
+   │   - Non-corporate Priority_cpp                             │
+   │   - Non_corporate                                          │
+   │   - ABC Coursera                                           │
+   │   - ABC Courses                                            │
+   │   - Udemy Courses                                          │
+   └────────────────────────────────────────────────────────────┘
+
+ 
+RECO Ratings Code - All Steps Explained 
+
+1. Open the course data file.
+
+2. Read these two columns:
+   - course_duration__c: Shows how long the course is (e.g., 5 or 2.5).
+   - duration_medium__c: Shows the unit (e.g., "Days", "Months").
+
+3. Fix the duration units for consistency:
+   - "Day" → "Days"  
+   - "Month" → "Months"  
+   - "Year" → "Years"  
+
+4. Define the number of seconds in each time unit:
+   - 1 Year = 31,536,000 seconds  
+   - 1 Month = 2,629,743 seconds (average)  
+   - 1 Week = 604,800 seconds  
+   - 1 Day = 86,400 seconds  
+   - 1 Hour = 3,600 seconds  
+   - 1 Minute = 60 seconds  
+
+5. Convert all course durations into seconds.
+
+6. Add a new column called Duration_in_seconds to store the converted values.
+
+7. Add a column called Is_within_a_week:
+   - If the course is exactly 7 days  mark it as True, else False.
+
+8. Mark Non-Corporate (Wizr Courses) integrations:
+   - Create an Integration column.
+   - Set it to True if the provider is Guvi Geeks, Edujournal, Sharpener, or Business Toys Skills School. Otherwise, set to False.
+
+9. Count number of concepts in each course:
+   - Use the "concepts" column.
+   - Count how many commas are there (each comma means another concept).
+
+10. Handle missing concepts:
+    - If the "concepts" column is empty:
+      - Set concept_count = 0  
+      - Set show = True  
+      - Set concept = False  
+
+11. Mark Priority_cpp for Non-Corporate courses((Wizr courses):
+    - If the provider is Henry Harvin or Eduonix, mark Priority_cpp as True.
+
+12. Mark Udemy courses:
+    - If the provider is Udemy, mark Udemy_course as True.
+
+13. Mark Coursera courses (Only for ABC data):
+    - If the provider is Coursera, mark ABC_coursera as True.
+
+14. Mark ABC courses:
+    - If the provider is GVC, Gyanodaya Virtual Campus, or CIEL, mark ABC as True.
+
+15. Rank the courses:
+    - Use these columns for ranking:
+      - Duration_in_seconds  
+      - Integration  
+      - INR amount
+
+16. Save the final file with columns in this order:
+    - Non-corporate Priority_cpp  
+    - Non_corporate  
+    - ABC Coursera  
+    - ABC Courses  
+    - Udemy Courses
